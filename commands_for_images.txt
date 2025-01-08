@@ -1,3 +1,6 @@
+Сохранить образы:
+
+
 docker save -o redis_image.tar redis:7
 
 docker save -o prometheus_image.tar prom/prometheus:latest
@@ -16,11 +19,9 @@ docker save -o opensearch_image.tar opensearchproject/opensearch:2.9.0
 
 docker save -o logstash_image.tar opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
 
-
-
 ---------------------------------------------------------------------------------------------------------------------
 
-
+Загрузить образы:
 
 
 docker load -i redis_image.tar
@@ -41,4 +42,11 @@ docker load -i opensearch_image.tar
 
 docker load -i logstash_image.tar
 
+---------------------------------------------------------------------------------------------------------------------
 
+Посмотреть кеш:
+
+
+docker exec -it redis redis-cli
+KEYS *
+HGETALL <name>

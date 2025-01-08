@@ -1,0 +1,44 @@
+docker save -o redis_image.tar redis:7
+
+docker save -o prometheus_image.tar prom/prometheus:latest
+
+docker save -o pgadmin_image.tar dpage/pgadmin4:latest
+
+docker save -o grafana_image.tar grafana/grafana:latest
+
+docker save -o postgres_image.tar postgres:15
+
+docker save -o rabbitmq_image.tar rabbitmq:3-management
+
+docker save -o kibana_image.tar opensearchproject/opensearch-dashboards:2.9.0
+
+docker save -o opensearch_image.tar opensearchproject/opensearch:2.9.0
+
+docker save -o logstash_image.tar opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+
+docker load -i redis_image.tar
+
+docker load -i prometheus_image.tar
+
+docker load -i pgadmin_image.tar
+
+docker load -i grafana_image.tar
+
+docker load -i postgres_image.tar
+
+docker load -i rabbitmq_image.tar
+
+docker load -i kibana_image.tar
+
+docker load -i opensearch_image.tar
+
+docker load -i logstash_image.tar
+
+

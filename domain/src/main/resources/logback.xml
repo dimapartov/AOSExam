@@ -1,0 +1,19 @@
+<configuration>
+
+    <!-- Консольный аппендер: будет писать в stdout контейнера,
+         и Docker сможет показывать эти логи через `docker logs` -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Настройка уровней логирования для вашего пакета -->
+    <logger name="com.example.domain" level="DEBUG"/>
+
+    <!-- Root-логгер, в который подвязываем аппендер -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

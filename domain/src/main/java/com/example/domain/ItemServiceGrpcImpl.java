@@ -1,6 +1,8 @@
 package com.example.domain;
 
 import com.example.grpc.*;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import org.slf4j.Logger;
@@ -24,39 +26,62 @@ public class ItemServiceGrpcImpl extends ItemServiceGrpc.ItemServiceImplBase {
         Long id = request.getId();
         log.debug("gRPC getItemById called with id={}", id);
 
-        com.example.grpc.Item entity = toProto(repository.findById(id));
-        if (entity == null) {
-            // Пустой Item
-            entity = com.example.grpc.Item.newBuilder().build();
-            log.debug("Item with id={} not found, returning empty gRPC Item", id);
-        } else {
-            log.debug("Item with id={} found, returning gRPC Item", id);
+        try {
+            com.example.domain.Item item = repository.findById(id);
+
+            // Если  айтем не найден
+            if (item == null) {
+                log.warn("Item with id={} not found", id);
+                responseObserver.onError(Status.NOT_FOUND
+                        .withDescription("Item with ID " + id + " not found")
+                        .asRuntimeException());
+                return;
+            }
+
+            com.example.grpc.Item grpcItem = toProto(item);
+
+            GetItemResponse resp = GetItemResponse.newBuilder()
+                    .setItem(grpcItem)
+                    .build();
+
+            responseObserver.onNext(resp);
+            responseObserver.onCompleted();
+            log.debug("Item with id={} sent via gRPC", id);
+
+        } catch (Exception e) {
+            log.error("Error fetching item with id={} from the repository: {}", id, e.getMessage());
+            responseObserver.onError(Status.NOT_FOUND
+                    .withDescription("Failed to connect to repository or process request")
+                    .withCause(e)
+                    .asRuntimeException());
         }
-
-        GetItemResponse resp = GetItemResponse.newBuilder()
-                .setItem(entity)
-                .build();
-
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
     }
 
     @Override
     public void getAllItems(Empty request, StreamObserver<GetAllItemsResponse> responseObserver) {
         log.debug("gRPC getAllItems called");
 
-        List<com.example.grpc.Item> protoList = repository.findAll()
-                .stream()
-                .map(this::toProto)
-                .collect(Collectors.toList());
+        try {
+            List<com.example.grpc.Item> protoList = repository.findAll()
+                    .stream()
+                    .map(this::toProto)
+                    .collect(Collectors.toList());
 
-        GetAllItemsResponse resp = GetAllItemsResponse.newBuilder()
-                .addAllItems(protoList)
-                .build();
+            GetAllItemsResponse resp = GetAllItemsResponse.newBuilder()
+                    .addAllItems(protoList)
+                    .build();
 
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
-        log.debug("Returned total {} items via gRPC", protoList.size());
+            responseObserver.onNext(resp);
+            responseObserver.onCompleted();
+            log.debug("Returned total {} items via gRPC", protoList.size());
+
+        } catch (Exception e) {
+            log.error("Error fetching all items from the repository: {}", e.getMessage());
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Failed to connect to repository or process request")
+                    .withCause(e)
+                    .asRuntimeException());
+        }
     }
 
     private com.example.grpc.Item toProto(com.example.domain.Item i) {
